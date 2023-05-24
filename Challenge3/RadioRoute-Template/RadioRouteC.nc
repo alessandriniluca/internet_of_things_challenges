@@ -49,6 +49,9 @@ implementation {
 
   routing_table_row_t routing_table[7];
   
+  //person code
+  uint8_t person_code[8] = {1,0,6,5,9,8,0,8}; //TODO: change this to your person code
+  uint8_t person_code_index = 0;
 
   message_t my_queued_packet;
   uint16_t my_queue_addr;
@@ -60,6 +63,25 @@ implementation {
   
   bool actual_send (uint16_t address, message_t* packet);
   bool generate_send (uint16_t address, message_t* packet, uint8_t type);
+
+  void play_led(){
+    switch (person_code[person_code_index] % 3){
+      case 0:
+        call Leds.led0Toggle();
+        break;
+      case 1:
+        call Leds.led1Toggle();
+        break;
+      case 2:
+        call Leds.led2Toggle();
+        break;
+    }
+    if (TOS_NODE_ID == 6){
+      dbg("led", "%u,%u,%u\n", (call Leds.get() & LEDS_LED0)> 0?1:0,(call Leds.get() & LEDS_LED1 )> 0?1:0,(call Leds.get() & LEDS_LED2 )> 0?1:0);
+    }
+    person_code_index++;
+    person_code_index = person_code_index % 9;
+  }
 
   
   
@@ -136,15 +158,12 @@ implementation {
     /* Fill it ... */
     
     call AMControl.start();
+    call Timer1.startOneShot(5000);
   }
 
   event void AMControl.startDone(error_t err) {
     /* Fill it ... */
-    if (err == SUCCESS) {
-      call Timer1.startOneShot(5000);
-      call Timer1.startOneShot(5000);
-    }
-    else {
+    if (err != SUCCESS) {
       call AMControl.start();
     }
   }
@@ -165,7 +184,7 @@ implementation {
         sendMsg->data = 7;
         dbg("timer","Sending REQ to %d\n", sendMsg->data);
         generate_send(AM_BROADCAST_ADDR, &packet, 1);
-        call Timer1.startOneShot(1000); //TODO check
+        call Timer1.startOneShot(250); //TODO check
       }else{
         radio_route_msg_t* sendMsg = (radio_route_msg_t*)call Packet.getPayload(&packet, sizeof(radio_route_msg_t));
         sendMsg->type = 0;
@@ -191,6 +210,7 @@ implementation {
     if(len == sizeof(radio_route_msg_t)){
       radio_route_msg_t* recMsg = (radio_route_msg_t*)payload;
       dbg("radio_rec","Received packet of type %u with data: %u\n", recMsg->type, recMsg->data);
+      play_led();
       if(recMsg->type == 0){//data
         if(recMsg->dest == TOS_NODE_ID){// if the packet is for me
           //TODO
@@ -250,7 +270,7 @@ implementation {
 
         radio_route_msg_t* sendMsg = (radio_route_msg_t*)call Packet.getPayload(&packet, sizeof(radio_route_msg_t));
         if(recMsg->dest != TOS_NODE_ID){
-          if (routing_table[recMsg->dest-1].cost == 0){
+          if (routing_table[recMsg->dest-1].cost == 0){ //TODO join branch
             routing_table[recMsg->dest-1].cost = recMsg->data;
             routing_table[recMsg->dest-1].next_hop = recMsg->src;
             sendMsg->type = 2;
