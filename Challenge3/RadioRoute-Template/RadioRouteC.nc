@@ -1,15 +1,7 @@
-
-/*
-*	IMPORTANT:
-*	The code will be avaluated based on:
-*		Code design  
-*
-*/
- 
- 
 #include "Timer.h"
 #include "RadioRoute.h"
-//#include <lib/hashmap.h>
+
+#define heavy_debug
 
 
 module RadioRouteC @safe() {
@@ -24,12 +16,6 @@ module RadioRouteC @safe() {
   interface Timer<TMilli> as Timer1;
   interface SplitControl as AMControl;
   interface Packet;
-
-
-    //interfaces for communication
-	//interface for timers
-	//interface for LED
-    //other interfaces, if needed
   }
 }
 implementation {
@@ -50,10 +36,10 @@ implementation {
   routing_table_row_t routing_table[7];
   
   //person code
-  uint8_t person_code[8] = {1,0,6,5,9,8,0,8}; //TODO: change this to your person code
+  uint8_t person_code[8] = {1,0,5,6,9,3,6,3};
   uint8_t person_code_index = 0;
 
-  message_t my_queued_packet;
+  message_t my_queued_packet; //TODO
   uint16_t my_queue_addr;
   
   bool route_req_sent=FALSE;
@@ -77,10 +63,10 @@ implementation {
         break;
     }
     if (TOS_NODE_ID == 6){
-      dbg("led", "%u,%u,%u\n", (call Leds.get() & LEDS_LED0)> 0?1:0,(call Leds.get() & LEDS_LED1 )> 0?1:0,(call Leds.get() & LEDS_LED2 )> 0?1:0);
+      dbg("led", "Node %u led: %u,%u,%u\n", TOS_NODE_ID,(call Leds.get() & LEDS_LED0)> 0?1:0,(call Leds.get() & LEDS_LED1 )> 0?1:0,(call Leds.get() & LEDS_LED2 )> 0?1:0);
     }
     person_code_index++;
-    person_code_index = person_code_index % 9;
+    person_code_index = person_code_index % 8;
   }
 
   
@@ -129,14 +115,10 @@ implementation {
   }
   
   bool actual_send (uint16_t address, message_t* packet){
-    /*
-    * Implement here the logic to perform the actual send of the packet using the tinyOS interfaces
-    */
     if (locked){
-      dbg("radio_send","locked!!!\n");
+      dbgerror("radio_send","locked!!!\n");
       return FALSE;
     }else{
-      
       radio_route_msg_t* msg = (radio_route_msg_t*)call Packet.getPayload(packet, sizeof(radio_route_msg_t));
       dbg("radio_send","Sending packet of type %u to %u with data: %u\n", msg->type, address, msg->data);
       if (call AMSend.send(address, packet, sizeof(radio_route_msg_t)) == SUCCESS){
@@ -155,27 +137,26 @@ implementation {
     }
 
     dbg("boot","Application booted.\n");
-    /* Fill it ... */
-    
     call AMControl.start();
     call Timer1.startOneShot(5000);
   }
 
+
   event void AMControl.startDone(error_t err) {
-    /* Fill it ... */
     if (err != SUCCESS) {
       call AMControl.start();
     }
   }
 
+
+
   event void AMControl.stopDone(error_t err) {
-    /* Fill it ... */
   }
   
+
+
+
   event void Timer1.fired() {
-    /*
-    * Implement here the logic to trigger the Node 1 to send the first REQ packet
-    */
     dbg("timer","Timer1 fired.\n");
     if (TOS_NODE_ID == 1){
       if(routing_table[6].cost == 0){
@@ -187,34 +168,33 @@ implementation {
         call Timer1.startOneShot(250); //TODO check
       }else{
         radio_route_msg_t* sendMsg = (radio_route_msg_t*)call Packet.getPayload(&packet, sizeof(radio_route_msg_t));
-        sendMsg->type = 0;
+        sendMsg->type = DATA_MSG;
         sendMsg->src = TOS_NODE_ID;
         sendMsg->dest = 7;
         sendMsg->data = 5;
-        dbg("timer","Sending DATA to %d\n", routing_table[6].next_hop);
-        generate_send(routing_table[6].next_hop, &packet, 0);
+        dbg("radio_rec","Sending DATA to %d\n", routing_table[6].next_hop);
+        generate_send(routing_table[6].next_hop, &packet, DATA_MSG);
       }
     }
   
   }
 
-  event message_t* Receive.receive(message_t* bufPtr, void* payload, uint8_t len) {
-    /*
-    * Parse the receive packet.
-    * Implement all the functionalities
-    * Perform the packet send using the generate_send function if needed
-    * Implement the LED logic and print LED status on Debug
-    */
-    
-    
+
+
+
+
+
+  event message_t* Receive.receive(message_t* bufPtr, void* payload, uint8_t len) { 
     if(len == sizeof(radio_route_msg_t)){
       radio_route_msg_t* recMsg = (radio_route_msg_t*)payload;
+      radio_route_msg_t* sendMsg = (radio_route_msg_t*)call Packet.getPayload(&packet, sizeof(radio_route_msg_t));
       dbg("radio_rec","Received packet of type %u with data: %u\n", recMsg->type, recMsg->data);
       play_led();
-      if(recMsg->type == 0){//data
+      switch (recMsg->type){
+      case DATA_MSG:
         if(recMsg->dest == TOS_NODE_ID){// if the packet is for me
           //TODO
-          dbg("radio_rec","data received: %d\n", recMsg->data);
+          dbg("data_rec","Final data received: %d\n", recMsg->data);
         }else{
           if (routing_table[recMsg->dest-1].cost == 0){
             //send ROUTE_REQ to all 
@@ -229,78 +209,69 @@ implementation {
             //Timer1.startOneShot(100);
           }else{
             //send data to next hop
-           
-            radio_route_msg_t* sendMsg = (radio_route_msg_t*)call Packet.getPayload(&packet, sizeof(radio_route_msg_t));
-            sendMsg->type = 0;
+            sendMsg->type = DATA_MSG;
             sendMsg->src = recMsg->src;
             sendMsg->dest = recMsg->dest;
             sendMsg->data = recMsg->data;
-            dbg("timer","Forwarding DATA to %d\n", routing_table[6].next_hop);
-            generate_send(routing_table[recMsg->dest-1].next_hop, &packet, 0);
+            dbg("radio_send","Forwarding DATA to %d\n", routing_table[6].next_hop);
+            generate_send(routing_table[recMsg->dest-1].next_hop, &packet, DATA_MSG);
           }
         }
+        break;
 
-      }else if(recMsg->type == 1){//ROUTE_REQ
-      
-        radio_route_msg_t* sendMsg = (radio_route_msg_t*)call Packet.getPayload(&packet, sizeof(radio_route_msg_t));
+      case ROUTE_REQ_MSG:
         if(recMsg->data == TOS_NODE_ID){// if the packet is for me
           //send back ROUTE_REPLY with cost 1
-          sendMsg->type = 2;
+          sendMsg->type = ROUTE_REPLY_MSG;
           sendMsg->src = TOS_NODE_ID; //sender
           sendMsg->dest = TOS_NODE_ID; //node requested
           sendMsg->data = 1;
-          generate_send(AM_BROADCAST_ADDR, &packet, 2);
+          generate_send(AM_BROADCAST_ADDR, &packet, ROUTE_REPLY_MSG);
         }else{
           if (routing_table[recMsg->dest-1].cost == 0){ // if I have not that entry, I need to broadcast it
             //send ROUTE_REQ to all
             dbg("radio_send","Preparing ROUTE_REQ to all for finding node %d\n", recMsg->data);
-            sendMsg->type = 1;
+            sendMsg->type = ROUTE_REQ_MSG;
             sendMsg->data = recMsg->data; //REQUESTED NODE
             generate_send(AM_BROADCAST_ADDR, &packet, 1);
           }else{
             //send ROUTE_REPLY to all incrementing the cost 
-            sendMsg->type = 2;
+            sendMsg->type = ROUTE_REPLY_MSG;
             sendMsg->src = TOS_NODE_ID; //sender
             sendMsg->dest = recMsg->data; //node requested
             sendMsg->data = routing_table[recMsg->data - 1].cost + 1;
-            generate_send(AM_BROADCAST_ADDR, &packet, 2);
+            generate_send(AM_BROADCAST_ADDR, &packet, ROUTE_REPLY_MSG);
           }
         }
-      }else if(recMsg->type == 2){//ROUTE_REPLY
+        break;
 
-        radio_route_msg_t* sendMsg = (radio_route_msg_t*)call Packet.getPayload(&packet, sizeof(radio_route_msg_t));
+      case ROUTE_REPLY_MSG: 
         if(recMsg->dest != TOS_NODE_ID){
-          if (routing_table[recMsg->dest-1].cost == 0){ //TODO join branch
+          if (routing_table[recMsg->dest-1].cost == 0 || routing_table[recMsg->dest-1].cost > recMsg->data){
             routing_table[recMsg->dest-1].cost = recMsg->data;
             routing_table[recMsg->dest-1].next_hop = recMsg->src;
-            sendMsg->type = 2;
+            sendMsg->type = ROUTE_REPLY_MSG;
             sendMsg->src = TOS_NODE_ID;
             sendMsg->dest = recMsg->dest;
             sendMsg->data = recMsg->data + 1;
-            generate_send(AM_BROADCAST_ADDR, &packet, 2);
-          }else{
-            if (routing_table[recMsg->dest-1].cost > recMsg->data){
-              routing_table[recMsg->dest-1].cost = recMsg->data;
-              routing_table[recMsg->dest-1].next_hop = recMsg->src;
-              sendMsg->type = 2;
-              sendMsg->src = TOS_NODE_ID;
-              sendMsg->dest = recMsg->dest;
-              sendMsg->data = recMsg->data + 1;
-              generate_send(AM_BROADCAST_ADDR, &packet, 2);
-            }
+            generate_send(AM_BROADCAST_ADDR, &packet, ROUTE_REPLY_MSG);
           }
         }
-      } 
+        break;
+
+      }
+     
     }else{
-      dbg("radio_rec","Received packet of wrong size\n");
+      dbgerror("radio_rec","Received packet of wrong size\n");
     }
     return bufPtr;
   }
 
+
+
+
+
   event void AMSend.sendDone(message_t* bufPtr, error_t error) {
-	/* This event is triggered when a message is sent 
-	*  Check if the packet is sent 
-	*/ 
     locked = FALSE;
     dbg ("radio_send", "Packet sent\n");
   }
