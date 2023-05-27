@@ -51,6 +51,10 @@ implementation {
   bool generate_send (uint16_t address, message_t* packet, uint8_t type);
 
   void play_led(){
+    /*
+    * 
+    * Function to be used to correctly toggle the led according to the operation specified in the slides.
+    */
     switch (person_code[person_code_index] % 3){
       case 0:
         call Leds.led0Toggle();
@@ -131,6 +135,8 @@ implementation {
   
   
   event void Boot.booted() {
+
+    // Initialize the routing table
     uint16_t i;
     for (i = 0; i < 7; i++) {
       routing_table[i].cost = 0;
@@ -158,8 +164,10 @@ implementation {
 
   event void Timer1.fired() {
     dbg("timer","Timer1 fired.\n");
+    // Node 1 needs to be triggered to try to send the data message.
     if (TOS_NODE_ID == 1){
       if(routing_table[6].cost == 0){
+        // We arrive here if the routing table for the destination node has not been populated yet.
         radio_route_msg_t* sendMsg = (radio_route_msg_t*)call Packet.getPayload(&packet, sizeof(radio_route_msg_t));
         sendMsg->type = 1;//REQ
         sendMsg->data = 7;
@@ -167,6 +175,7 @@ implementation {
         generate_send(AM_BROADCAST_ADDR, &packet, 1);
         call Timer1.startOneShot(250); //TODO check
       }else{
+        // We arrive here if the routing table for the destination node has been populated.
         radio_route_msg_t* sendMsg = (radio_route_msg_t*)call Packet.getPayload(&packet, sizeof(radio_route_msg_t));
         sendMsg->type = DATA_MSG;
         sendMsg->src = TOS_NODE_ID;
@@ -199,7 +208,8 @@ implementation {
           if (routing_table[recMsg->dest-1].cost == 0){
             //send ROUTE_REQ to all 
             //should not happen
-            //TODO check
+            //TODO check, we should forward a REQUEST, and wait for the packet, as in case of node 1.
+            //after a certain number of attempt, we could drop the message.
             dbg("radio_rec","routing table not complete\n");
             //my_queued_packet = payload;
             //my_queue_addr = recMsg->dest;
@@ -247,6 +257,10 @@ implementation {
 
       case ROUTE_REPLY_MSG: 
         if(recMsg->dest != TOS_NODE_ID){
+          // Update the routing table only If I have not populated it for that node, or if I have a greater cost than
+          // the one received.
+          // In the case the condition of the 'if' statement is satisfied, I need to broadcast the package
+          // by incrementing the cost of 1.
           if (routing_table[recMsg->dest-1].cost == 0 || routing_table[recMsg->dest-1].cost > recMsg->data){
             routing_table[recMsg->dest-1].cost = recMsg->data;
             routing_table[recMsg->dest-1].next_hop = recMsg->src;
@@ -276,7 +290,9 @@ implementation {
     dbg ("radio_send", "Packet sent\n");
   }
 }
-/*
+
+
+/* network structure, reported here in a comment just for convenience.
 1 2 -60.0
 2 1 -60.0
 1 3 -60.0
