@@ -39,9 +39,6 @@ implementation {
   uint8_t person_code[8] = {1,0,5,6,9,3,6,3};
   uint8_t person_code_index = 0;
 
-  message_t my_queued_packet; //TODO
-  uint16_t my_queue_addr;
-  
   bool route_req_sent=FALSE;
   bool route_rep_sent=FALSE;
   
@@ -67,6 +64,8 @@ implementation {
         break;
     }
     if (TOS_NODE_ID == 6){
+      dbg("led6", "-----------------------Node %u led: %u,%u,%u\n", TOS_NODE_ID,(call Leds.get() & LEDS_LED0)> 0?1:0,(call Leds.get() & LEDS_LED1 )> 0?1:0,(call Leds.get() & LEDS_LED2 )> 0?1:0);
+    }else{
       dbg("led", "Node %u led: %u,%u,%u\n", TOS_NODE_ID,(call Leds.get() & LEDS_LED0)> 0?1:0,(call Leds.get() & LEDS_LED1 )> 0?1:0,(call Leds.get() & LEDS_LED2 )> 0?1:0);
     }
     person_code_index++;
@@ -173,7 +172,7 @@ implementation {
         sendMsg->data = 7;
         dbg("timer","Sending REQ to %d\n", sendMsg->data);
         generate_send(AM_BROADCAST_ADDR, &packet, 1);
-        call Timer1.startOneShot(250); //TODO check
+        call Timer1.startOneShot(250);
       }else{
         // We arrive here if the routing table for the destination node has been populated.
         radio_route_msg_t* sendMsg = (radio_route_msg_t*)call Packet.getPayload(&packet, sizeof(radio_route_msg_t));
@@ -202,21 +201,11 @@ implementation {
       switch (recMsg->type){
       case DATA_MSG:
         if(recMsg->dest == TOS_NODE_ID){// if the packet is for me
-          //TODO
           dbg("data_rec","Final data received: %d\n", recMsg->data);
         }else{
           if (routing_table[recMsg->dest-1].cost == 0){
-            //send ROUTE_REQ to all 
             //should not happen
-            //TODO check, we should forward a REQUEST, and wait for the packet, as in case of node 1.
-            //after a certain number of attempt, we could drop the message.
-            dbg("radio_rec","routing table not complete\n");
-            //my_queued_packet = payload;
-            //my_queue_addr = recMsg->dest;
-            //packet.type = 1;
-            //packet.data = recMsg->dest;
-            //call generate_send(AM_BROADCAST_ADDR, &packet, 1);
-            //Timer1.startOneShot(100);
+            dbgerror("radio_send","routing table not complete\n");
           }else{
             //send data to next hop
             sendMsg->type = DATA_MSG;

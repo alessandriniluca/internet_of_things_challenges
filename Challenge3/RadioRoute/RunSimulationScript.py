@@ -26,20 +26,22 @@ print "Initializing simulator....";
 t.init();
 
 
-#simulation_outfile = "simulation.txt";
-#print "Saving sensors simulation output to:", simulation_outfile;
-#simulation_out = open(simulation_outfile, "w");
+simulation_outfile = "simulation.txt";
+print "Saving sensors simulation output to:", simulation_outfile;
+simulation_out = open(simulation_outfile, "w");
 
-#out = open(simulation_outfile, "w");
-out = sys.stdout;
+out = open(simulation_outfile, "w");
+#out = sys.stdout;
 
 #Add debug channel
 print "Activate debug message on channel boot"
 t.addChannel("boot",out);
 print "Activate debug message on channel timer"
 t.addChannel("timer",out);
-print "Activate debug message on channel led"
+print "Activate debug message on channel leds"
 t.addChannel("led",out);
+print "Activate debug message on channel led6"
+t.addChannel("led6",out);
 print "Activate debug message on channel radio_send"
 t.addChannel("radio_send",out);
 print "Activate debug message on channel radio_rec"
