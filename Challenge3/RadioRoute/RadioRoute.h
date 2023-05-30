@@ -25,6 +25,13 @@ enum {
 	ROUTE_REPLY_MSG = 2,
 };
 
+
+typedef struct routing_table_row {
+	uint16_t next_hop; // ID del prossimo hop
+	uint16_t cost; // costo del percorso
+} routing_table_row_t;
+
+
 enum {
   AM_RADIO_COUNT_MSG = 10,
 };

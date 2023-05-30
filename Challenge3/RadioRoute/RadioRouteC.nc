@@ -28,11 +28,6 @@ implementation {
   uint16_t time_delays[7]={61,173,267,371,479,583,689}; //Time delay in milli seconds
 
   //Array to store the routing table
-  typedef struct routing_table_row {
-    uint16_t next_hop; // ID del prossimo hop
-    uint16_t cost; // costo del percorso
-  } routing_table_row_t;
-
   routing_table_row_t routing_table[7];
   
   //person code
@@ -90,17 +85,17 @@ implementation {
   	if (call Timer0.isRunning()){
   		return FALSE;
   	}else{
-      if (type == 1 && !route_req_sent ){
+      if (type == ROUTE_REQ_MSG && !route_req_sent ){//modified to use the enum
         route_req_sent = TRUE;
         call Timer0.startOneShot( time_delays[TOS_NODE_ID-1] );
         queued_packet = *packet;
         queue_addr = address; //modified because of typo
-      }else if (type == 2 && !route_rep_sent){
+      }else if (type == ROUTE_REPLY_MSG && !route_rep_sent){//modified to use the enum
         route_rep_sent = TRUE;
         call Timer0.startOneShot( time_delays[TOS_NODE_ID-1] );
         queued_packet = *packet;
         queue_addr = address; //modified because of typo
-      }else if (type == 0){
+      }else if (type == DATA_MSG){//modified to use the enum
         call Timer0.startOneShot( time_delays[TOS_NODE_ID-1] );
         queued_packet = *packet;
         queue_addr = address; //modified because of typo
@@ -143,12 +138,14 @@ implementation {
 
     dbg("boot","Application booted.\n");
     call AMControl.start();
-    call Timer1.startOneShot(5000);
+    
   }
 
 
   event void AMControl.startDone(error_t err) {
-    if (err != SUCCESS) {
+    if (err == SUCCESS) {
+      call Timer1.startOneShot(5000);
+    }else{
       call AMControl.start();
     }
   }
@@ -156,6 +153,7 @@ implementation {
 
 
   event void AMControl.stopDone(error_t err) {
+    // do nothing
   }
   
 
@@ -228,7 +226,7 @@ implementation {
           generate_send(AM_BROADCAST_ADDR, &packet, ROUTE_REPLY_MSG);
         }else{
           if (routing_table[recMsg->dest-1].cost == 0){ // if I have not that entry, I need to broadcast it
-            //send ROUTE_REQ to all
+            //send ROUTE_REQ to allx 
             dbg("radio_send","Preparing ROUTE_REQ to all for finding node %d\n", recMsg->data);
             sendMsg->type = ROUTE_REQ_MSG;
             sendMsg->data = recMsg->data; //REQUESTED NODE
@@ -275,8 +273,10 @@ implementation {
 
 
   event void AMSend.sendDone(message_t* bufPtr, error_t error) {
-    locked = FALSE;
-    dbg ("radio_send", "Packet sent\n");
+    if (&queued_packet == bufPtr) {
+      locked = FALSE;
+      dbg("radio_send", "Packet sent\n");
+    }
   }
 }
 

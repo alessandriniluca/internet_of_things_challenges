@@ -92,6 +92,8 @@ DEBUG (7): Packet sent
 DEBUG (1): Timer1 fired.
 DEBUG (1): Sending REQ to 7
 DEBUG (5): Sending packet of type 2 to 65535 with data: 2
+DEBUG (7): Received packet of type 2 with data: 2
+DEBUG (7): Node 7 led: 1,1,1
 DEBUG (3): Received packet of type 2 with data: 2
 DEBUG (3): Node 3 led: 0,1,1
 DEBUG (6): Received packet of type 2 with data: 2
@@ -101,7 +103,7 @@ DEBUG (1): Timer1 fired.
 DEBUG (1): Sending REQ to 7
 DEBUG (6): Sending packet of type 2 to 65535 with data: 2
 DEBUG (7): Received packet of type 2 with data: 2
-DEBUG (7): Node 7 led: 1,1,1
+DEBUG (7): Node 7 led: 0,1,1
 DEBUG (5): Received packet of type 2 with data: 2
 DEBUG (5): Node 5 led: 0,1,1
 DEBUG (4): Received packet of type 2 with data: 2
@@ -112,16 +114,14 @@ DEBUG (1): Sending REQ to 7
 DEBUG (3): Sending packet of type 2 to 65535 with data: 3
 DEBUG (4): Received packet of type 2 with data: 3
 DEBUG (4): Node 4 led: 1,1,1
-DEBUG (1): Received packet of type 2 with data: 3
-DEBUG (1): Node 1 led: 1,1,1
 DEBUG (5): Received packet of type 2 with data: 3
 DEBUG (5): Node 5 led: 1,1,1
+DEBUG (1): Received packet of type 2 with data: 3
+DEBUG (1): Node 1 led: 1,1,1
 DEBUG (3): Packet sent
 DEBUG (1): Sending packet of type 2 to 65535 with data: 4
 DEBUG (3): Received packet of type 2 with data: 4
 DEBUG (3): Node 3 led: 1,1,1
-DEBUG (2): Received packet of type 2 with data: 4
-DEBUG (2): Node 2 led: 1,1,1
 DEBUG (1): Packet sent
 DEBUG (4): Sending packet of type 2 to 65535 with data: 3
 DEBUG (3): Received packet of type 2 with data: 3
@@ -129,17 +129,21 @@ DEBUG (3): Node 3 led: 0,1,1
 DEBUG (6): Received packet of type 2 with data: 3
 DEBUG (6): -----------------------Node 6 led: 1,1,1
 DEBUG (2): Received packet of type 2 with data: 3
-DEBUG (2): Node 2 led: 0,1,1
+DEBUG (2): Node 2 led: 1,1,1
 DEBUG (4): Packet sent
 DEBUG (1): Timer1 fired.
 DEBUG (1): Sending DATA to 3
-DEBUG (2): Sending packet of type 2 to 65535 with data: 5
-DEBUG (2): Packet sent
 DEBUG (1): Sending packet of type 0 to 3 with data: 5
 DEBUG (3): Received packet of type 0 with data: 5
 DEBUG (3): Node 3 led: 1,1,1
 DEBUG (3): Forwarding DATA to 5
 DEBUG (1): Packet sent
+DEBUG (2): Sending packet of type 2 to 65535 with data: 4
+DEBUG (4): Received packet of type 2 with data: 4
+DEBUG (4): Node 4 led: 0,1,1
+DEBUG (1): Received packet of type 2 with data: 4
+DEBUG (1): Node 1 led: 0,1,1
+DEBUG (2): Packet sent
 DEBUG (3): Sending packet of type 0 to 5 with data: 5
 DEBUG (5): Received packet of type 0 with data: 5
 DEBUG (5): Node 5 led: 0,1,1
@@ -147,6 +151,6 @@ DEBUG (5): Forwarding DATA to 7
 DEBUG (3): Packet sent
 DEBUG (5): Sending packet of type 0 to 7 with data: 5
 DEBUG (7): Received packet of type 0 with data: 5
-DEBUG (7): Node 7 led: 0,1,1
+DEBUG (7): Node 7 led: 1,1,1
 DEBUG (7): Final data received: 5
 DEBUG (5): Packet sent
