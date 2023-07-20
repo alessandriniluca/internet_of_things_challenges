@@ -1,0 +1,517 @@
+[
+    {
+        "id": "3aa11aca5785f243",
+        "type": "tab",
+        "label": "Challenge_2",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "d07ebe28dbd3337d",
+        "type": "mqtt in",
+        "z": "3aa11aca5785f243",
+        "name": "",
+        "topic": "polimi/challenge_2/2023/id_code_generator/4",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "9c09043b88b7b02d",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 190,
+        "y": 60,
+        "wires": [
+            [
+                "2491c7200d28a109",
+                "f4ecfac9fa9c9863"
+            ]
+        ]
+    },
+    {
+        "id": "2491c7200d28a109",
+        "type": "debug",
+        "z": "3aa11aca5785f243",
+        "name": "Raw data",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 500,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "c9a160171f41e476",
+        "type": "function",
+        "z": "3aa11aca5785f243",
+        "name": "module",
+        "func": "try{\n    if (isNaN(parseInt(msg.payload.id))){\n        return null\n    }\n    var n = (parseInt(msg.payload.id) + 9363) % 7711\n    msg.myid = n\n    return msg\n}catch{\n    return null\n}\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 480,
+        "y": 240,
+        "wires": [
+            [
+                "891def497c6cfc46",
+                "f443e22d286fd160"
+            ]
+        ]
+    },
+    {
+        "id": "891def497c6cfc46",
+        "type": "debug",
+        "z": "3aa11aca5785f243",
+        "name": "Operation result",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "myid",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 700,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "76b8b38ae830bd4f",
+        "type": "csv",
+        "z": "3aa11aca5785f243",
+        "name": "",
+        "sep": ",",
+        "hdrin": true,
+        "hdrout": "none",
+        "multi": "mult",
+        "ret": "\\r\\n",
+        "temp": "",
+        "skip": "0",
+        "strings": true,
+        "include_empty_strings": "",
+        "include_null_values": "",
+        "x": 730,
+        "y": 440,
+        "wires": [
+            [
+                "eca82b0f1dc2644e",
+                "e597eae5d7d075a0"
+            ]
+        ]
+    },
+    {
+        "id": "f443e22d286fd160",
+        "type": "file in",
+        "z": "3aa11aca5785f243",
+        "name": "CSV challenge file",
+        "filename": "C:\\Users\\flavi\\Desktop\\challenge2023_2.csv",
+        "filenameType": "str",
+        "format": "utf8",
+        "chunk": false,
+        "sendError": false,
+        "encoding": "none",
+        "allProps": false,
+        "x": 530,
+        "y": 440,
+        "wires": [
+            [
+                "76b8b38ae830bd4f"
+            ]
+        ]
+    },
+    {
+        "id": "eca82b0f1dc2644e",
+        "type": "debug",
+        "z": "3aa11aca5785f243",
+        "name": "debug 1",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 920,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "a895c421c6b45598",
+        "type": "debug",
+        "z": "3aa11aca5785f243",
+        "name": "debug 2",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1520,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "e597eae5d7d075a0",
+        "type": "function",
+        "z": "3aa11aca5785f243",
+        "name": "join",
+        "func": "var data = msg.payload[msg.myid-1]\nmsg.payload = data\nif (context.get(\"counter\") === undefined) {\n    context.set(\"counter\", 1)\n} else {\n    context.set(\"counter\", context.get(\"counter\") + 1)\n}\nif (context.get(\"counter\") > 100) {\n    return null\n}\nconsole.log(\"count: \" + context.get(\"counter\"))\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 910,
+        "y": 440,
+        "wires": [
+            [
+                "057d145f7cee8dd3",
+                "5191f7ecd463d7d7"
+            ]
+        ]
+    },
+    {
+        "id": "057d145f7cee8dd3",
+        "type": "function",
+        "z": "3aa11aca5785f243",
+        "name": "publishMap",
+        "func": "var splitted = msg.payload.Info.split(\", \")\nconsole.log(splitted)\nvar mymsg =[]\nvar count = 0;\nfor(let i =0; i<splitted.length; i++){\n    if (splitted[i].includes(\"Publish Message\")){\n        try{\n            //var data = '[' + msg.payload.Message + ']'\n            //let json = JSON.parse(data)[count]\n            let json = ''\n            if (msg.payload.Message != undefined){\n                let data = msg.payload.Message.split(/(?<=\\})\\s*,\\s*/g)\n                if (data[count] != undefined){\n                    json = data[count]\n                }\n            }else{\n                console.log(\"undef msg\")\n            }\n            let payload = {\n                \"timestamp\" : Date.now(),\n                \"id\" : msg.myid,\n                \"payload\" : json\n                }\n            mymsg.push(payload)\n            console.log(json)\n        }catch{\n            console.log('Format error in packet:')\n            console.log(msg.payload)\n            mymsg.push({\n                \"timestamp\": Date.now(),\n                \"id\": msg.myid,\n                \"payload\": \"\"\n            })\n        }\n        count++\n    }\n}\nconsole.log(splitted.length)\nmsg.payload = mymsg\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1150,
+        "y": 440,
+        "wires": [
+            [
+                "e81aa89076310b10"
+            ]
+        ]
+    },
+    {
+        "id": "e81aa89076310b10",
+        "type": "split",
+        "z": "3aa11aca5785f243",
+        "name": "",
+        "splt": "\\n",
+        "spltType": "str",
+        "arraySplt": 1,
+        "arraySpltType": "len",
+        "stream": false,
+        "addname": "",
+        "x": 1330,
+        "y": 440,
+        "wires": [
+            [
+                "a895c421c6b45598",
+                "6315e4e42d28d0ad"
+            ]
+        ]
+    },
+    {
+        "id": "6315e4e42d28d0ad",
+        "type": "mqtt out",
+        "z": "3aa11aca5785f243",
+        "name": "",
+        "topic": "polimi/iot2023/challenge2/10569363",
+        "qos": "2",
+        "retain": "false",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "9c09043b88b7b02d",
+        "x": 1590,
+        "y": 440,
+        "wires": []
+    },
+    {
+        "id": "ebd102088fdda0a0",
+        "type": "mqtt in",
+        "z": "3aa11aca5785f243",
+        "name": "",
+        "topic": "polimi/iot2023/challenge2/10569363",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "9c09043b88b7b02d",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 200,
+        "y": 820,
+        "wires": [
+            [
+                "ada77403bc9e442f",
+                "f9c0976b27718944"
+            ]
+        ]
+    },
+    {
+        "id": "ada77403bc9e442f",
+        "type": "function",
+        "z": "3aa11aca5785f243",
+        "name": "celsiusFilter",
+        "func": "try{\n    let data = JSON.parse(msg.payload.payload)\n    if (data.unit != \"C\"){\n        return null\n    }\n    msg.payload = data\n    return msg;\n}catch{\n    console.log(\"bad msg\")\n    return null\n}\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 490,
+        "y": 880,
+        "wires": [
+            [
+                "1b185c05efab93da",
+                "a8d770bb50130b2c",
+                "dbe957adda51b8d4"
+            ]
+        ]
+    },
+    {
+        "id": "1b185c05efab93da",
+        "type": "debug",
+        "z": "3aa11aca5785f243",
+        "name": "debug 3",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 720,
+        "y": 1020,
+        "wires": []
+    },
+    {
+        "id": "947ee0e92e0f6b89",
+        "type": "debug",
+        "z": "3aa11aca5785f243",
+        "name": "debug 4",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 940,
+        "y": 780,
+        "wires": []
+    },
+    {
+        "id": "a8d770bb50130b2c",
+        "type": "function",
+        "z": "3aa11aca5785f243",
+        "name": "numberExtractor",
+        "func": "msg.payload = msg.payload.range[1]\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 740,
+        "y": 860,
+        "wires": [
+            [
+                "947ee0e92e0f6b89",
+                "25db2abaa11dcc6a"
+            ]
+        ]
+    },
+    {
+        "id": "1c070f6151759efc",
+        "type": "file",
+        "z": "3aa11aca5785f243",
+        "name": "",
+        "filename": "C:\\Users\\flavi\\Desktop\\out.csv",
+        "filenameType": "str",
+        "appendNewline": true,
+        "createDir": false,
+        "overwriteFile": "false",
+        "encoding": "none",
+        "x": 1010,
+        "y": 940,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "dbe957adda51b8d4",
+        "type": "function",
+        "z": "3aa11aca5785f243",
+        "name": "stringifier",
+        "func": "msg.payload = JSON.stringify(msg.payload)\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 720,
+        "y": 940,
+        "wires": [
+            [
+                "1c070f6151759efc"
+            ]
+        ]
+    },
+    {
+        "id": "5191f7ecd463d7d7",
+        "type": "debug",
+        "z": "3aa11aca5785f243",
+        "name": "debug 5",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1140,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "f9c0976b27718944",
+        "type": "debug",
+        "z": "3aa11aca5785f243",
+        "name": "debug 6",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 480,
+        "y": 780,
+        "wires": []
+    },
+    {
+        "id": "25db2abaa11dcc6a",
+        "type": "ui_chart",
+        "z": "3aa11aca5785f243",
+        "name": "",
+        "group": "98a9f85dab59dc68",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "label": "chart",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "auto",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "3600",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 930,
+        "y": 860,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "f4ecfac9fa9c9863",
+        "type": "switch",
+        "z": "3aa11aca5785f243",
+        "name": "msg empty",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "nempty"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 310,
+        "y": 240,
+        "wires": [
+            [
+                "c9a160171f41e476"
+            ]
+        ]
+    },
+    {
+        "id": "9c09043b88b7b02d",
+        "type": "mqtt-broker",
+        "name": "HiveMQ",
+        "broker": "broker.hivemq.com",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "98a9f85dab59dc68",
+        "type": "ui_group",
+        "name": "Default",
+        "tab": "fbbba9cc9fb40467",
+        "order": 1,
+        "disp": true,
+        "width": "6",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "fbbba9cc9fb40467",
+        "type": "ui_tab",
+        "name": "Temp",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": false
+    }
+]
