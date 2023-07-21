@@ -77,7 +77,7 @@
                 "vt": "str"
             }
         ],
-        "repeat": "10",
+        "repeat": "30",
         "crontab": "",
         "once": false,
         "onceDelay": 0.1,
@@ -117,7 +117,7 @@
         "type": "function",
         "z": "3aa11aca5785f243",
         "name": "function 1",
-        "func": "//on messsage check type\n//if register add to queue \nif(msg.payload.type == \"REGISTER\"){\n    console.log(\"registered: \" + msg.payload.address)\n    let queue = flow.get(\"clientsQueue\");\n    if(!queue.includes(msg.payload.address)){\n        queue = queue.concat(msg.payload.address);\n    }else{\n        console.log('nope')\n    }\n    flow.set(\"clientsQueue\", queue);\n}else if(msg.payload.type == \"DATA\"){\n    console.log(msg.payload);\n}\nreturn msg;",
+        "func": "//on messsage check type\n//if register add to queue \nif(msg.payload.type == \"REGISTER\"){\n    console.log(\"Request to register by client ID \" + msg.payload.address)\n    let queue = flow.get(\"clientsQueue\");\n    if(!queue.includes(msg.payload.address)){\n        queue = queue.concat(msg.payload.address);\n        console.log('Added client ID '+msg.payload.address)\n    }else{\n        console.log('Not adding, already registered!')\n    }\n    flow.set(\"clientsQueue\", queue);\n}else if(msg.payload.type == \"DATA\"){\n    console.log(msg.payload);\n}\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "//initialize the queue\nif (flow.get(\"clientsQueue\") == undefined) {\n    flow.set(\"clientsQueue\", []);\n    console.log(\"init\")\n}",
