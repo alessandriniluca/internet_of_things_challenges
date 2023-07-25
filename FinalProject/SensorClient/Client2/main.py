@@ -34,7 +34,7 @@ def incomingProcessing(topic,msg):
     if(joined == 0):
       # supposing the beacon arrives in the same time in which it is sent, we need to wait the slot reserved to the beacon.
       # after that slot, the CAP start, and we can send the registering request.
-      waitingTime = float(msg['SlotDuration'])
+      waitingTime = float(msg['SlotDuration']*random.randint(0,(msg['CAPSlots']-1)))
       print('wait for: ' + str(waitingTime))
       time.sleep(waitingTime)
       message = json.dumps({
