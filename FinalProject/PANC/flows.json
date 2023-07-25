@@ -32,24 +32,19 @@
         "name": "",
         "props": [
             {
-                "p": "payload.timestamp",
-                "v": "",
-                "vt": "date"
+                "p": "payload.Type",
+                "v": "BEACON",
+                "vt": "str"
             },
             {
-                "p": "payload.slotDuration",
+                "p": "payload.SlotDuration",
                 "v": "0.5",
-                "vt": "str"
+                "vt": "num"
             },
             {
-                "p": "payload.ActiveSlots",
-                "v": "3",
-                "vt": "str"
-            },
-            {
-                "p": "payload.InactiveSlots",
-                "v": "5",
-                "vt": "str"
+                "p": "payload.CAPSlots",
+                "v": "2",
+                "vt": "num"
             },
             {
                 "p": "payload.CFPReservation",
@@ -59,22 +54,7 @@
             {
                 "p": "payload.BI",
                 "v": "30",
-                "vt": "str"
-            },
-            {
-                "p": "payload.type",
-                "v": "BEACON",
-                "vt": "str"
-            },
-            {
-                "p": "payload.CAPSlots",
-                "v": "",
-                "vt": "str"
-            },
-            {
-                "p": "payload.CFPslots",
-                "v": "",
-                "vt": "str"
+                "vt": "num"
             }
         ],
         "repeat": "30",
@@ -117,7 +97,7 @@
         "type": "function",
         "z": "3aa11aca5785f243",
         "name": "function 1",
-        "func": "//on messsage check type\n//if register add to queue \nif(msg.payload.type == \"REGISTER\"){\n    console.log(\"[PANC]: Request to register by client ID \" + msg.payload.address)\n    let queue = flow.get(\"clientsQueue\");\n    if(!queue.includes(msg.payload.address)){\n        queue = queue.concat(msg.payload.address);\n        console.log('[PANC]: Added client ID '+msg.payload.address)\n    }else{\n        console.log('[PANC]: Not adding, already registered!')\n    }\n    flow.set(\"clientsQueue\", queue);\n}else if(msg.payload.type == \"DATA\"){\n    let queue = flow.get(\"clientsQueue\");\n    if (msg.payload.destination == \"PANC\" && queue.includes(msg.payload.finalDestination)){\n        msg.payload.destination = msg.payload.finalDestination\n        console.log(\"[PANC]: Forwarding a data message to client \" + msg.payload.finalDestination + \": \")\n        return msg;\n    }else if(!queue.includes(msg.payload.finalDestination)){\n        console.log('[PANC]: dropping a data message since ' + msg.payload.finalDestination + ' is not connected to me:')\n    }\n    console.log(msg.payload)\n}",
+        "func": "// on messsage check type\n\n// if it is a register message add it to the client's queue (if not already done before) \nif(msg.payload.Type == \"REGISTER\"){\n    console.log(\"[PANC]: Request to register by client ID \" + msg.payload.From)\n    let queue = flow.get(\"clientsQueue\");\n    if(!queue.includes(msg.payload.From)){\n        queue = queue.concat(msg.payload.From);\n        console.log('[PANC]: Added client ID '+msg.payload.From)\n    }else{\n        console.log('[PANC]: Not adding node, already registered!')\n    }\n    flow.set(\"clientsQueue\", queue);\n}else if(msg.payload.Type == \"DATA\"){\n    // Log the message sniffed\n    console.log('[PANC]: Sniffed data message:')\n    console.log(msg.payload);\n}\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "//initialize the queue\nif (flow.get(\"clientsQueue\") == undefined) {\n    flow.set(\"clientsQueue\", []);\n    console.log(\"init\")\n}",
@@ -127,8 +107,7 @@
         "y": 760,
         "wires": [
             [
-                "949264a9bcef77b7",
-                "6db787316d8cce21"
+                "949264a9bcef77b7"
             ]
         ]
     },
@@ -137,7 +116,7 @@
         "type": "function",
         "z": "3aa11aca5785f243",
         "name": "function 2",
-        "func": "/* The queue is handled in the following way:\n// We take a slot from the CAP, and we \"move\" it in the CFP part,\n// Until when CAP is 1 slot: at that point we cannot\n// move that remaining slot, otherwise new eventual nodes will\n// not be able to send request to join. At that point,\n// we cycle over clients in a round robin way\n*/\nmsg.payload.CAPSlots = 3\nmsg.payload.CFPSlots = 0\nlet queue = flow.get(\"clientsQueue\");\nconsole.log(\"[PANC]: ------SENDING BEACON------\")\nif(queue.length != 0){\n    console.log(\"[PANC]: clients' IDs connected: \" + queue);\n    let res = [];\n    let CFPnumber = Math.min(queue.length, (msg.payload.ActiveSlots-1)) // minus one, because one needs to be free\n    for (let i = 0; i < CFPnumber; i++){\n        let el = queue.shift();\n        res = res.concat(el);\n        queue = queue.concat(el);\n    }\n    flow.set(\"clientsQueue\", queue);\n    res.sort();\n    console.log(\"[PANC]: CFP chedule of client's IDs this Beacon Interval: \" + res);\n    msg.payload.CFPReservation = JSON.stringify(res);\n    msg.payload.CAPSlots = msg.payload.ActiveSlots - CFPnumber;\n    msg.payload.CFPSlots = CFPnumber;\n}else{\n    console.log(\"[PANC]: clients' IDs connected: NONE\");\n}\nconsole.log(\"[PANC]: Number of slots in CAP for this Beacon Interval: \" + msg.payload.CAPSlots);\nconsole.log(\"[PANC]: Number of slots in CFP for this Beacon Interval: \" + msg.payload.CFPSlots);\nconsole.log(\"[PANC]: The BI lasts: \" + msg.payload.BI + \" seconds\")\nreturn msg;",
+        "func": "/* The queue is handled in the following way:\n// We take a slot from the CAP, and we \"move\" it in the CFP part,\n// Until when CAP is 1 slot: at that point we cannot\n// move that remaining slot, otherwise new eventual nodes will\n// not be able to send request to join. At that point,\n// we cycle over clients in a round robin way\n*/\nlet queue = flow.get(\"clientsQueue\");\nlet CFPnumber = 0\nconsole.log(\"[PANC]: ------SENDING BEACON------\")\nlet SleepNumber = (msg.payload.BI / msg.payload.SlotDuration) - 1 - msg.payload.CAPSlots;\nif(queue.length != 0){\n    console.log(\"[PANC]: clients' IDs connected: \" + queue);\n    let res = [];\n    CFPnumber = Math.min(queue.length, SleepNumber) // minus one, because one needs to be free\n    for (let i = 0; i < CFPnumber; i++){\n        let el = queue.shift();\n        res = res.concat(el);\n        queue = queue.concat(el);\n    }\n    SleepNumber = SleepNumber - res.length\n    flow.set(\"clientsQueue\", queue);\n    res.sort();\n    console.log(\"[PANC]: CFP schedule of client's IDs this Beacon Interval: \" + res);\n    msg.payload.CFPReservation = JSON.stringify(res);\n}else{\n    console.log(\"[PANC]: clients' IDs connected: NONE\");\n}\nconsole.log(\"[PANC]: Number of slots in CAP for this Beacon Interval: \" + msg.payload.CAPSlots);\nconsole.log(\"[PANC]: Number of slots in CFP for this Beacon Interval: \" + CFPnumber);\nconsole.log(\"[PANC]: Number of slots in Sleep for this Beacon Interval: \" + SleepNumber);\nlet dutyCycle = ((msg.payload.CAPSlots + CFPnumber + 1)*msg.payload.SlotDuration)/msg.payload.BI;\nconsole.log(\"[PANC]: The duty cycle of this Beacon Interval is \"+ dutyCycle)\nconsole.log(\"[PANC]: The BI lasts: \" + msg.payload.BI + \" seconds\")\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "//initialize the queue\nflow.set(\"clientsQueue\", []);\nconsole.log(\"[PANC]: Clients Queue Initialized\")",
@@ -198,24 +177,6 @@
         "statusType": "auto",
         "x": 1100,
         "y": 520,
-        "wires": []
-    },
-    {
-        "id": "6db787316d8cce21",
-        "type": "mqtt out",
-        "z": "3aa11aca5785f243",
-        "name": "",
-        "topic": "polimi/project-p7a",
-        "qos": "0",
-        "retain": "",
-        "respTopic": "",
-        "contentType": "",
-        "userProps": "",
-        "correl": "",
-        "expiry": "",
-        "broker": "d5cd849f1b93b2ca",
-        "x": 1130,
-        "y": 760,
         "wires": []
     },
     {

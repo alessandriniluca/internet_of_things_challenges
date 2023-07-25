@@ -7,14 +7,14 @@ from umqtt.simple import MQTTClient
 import random
 
 # MQTT Server Parameters
-MQTT_CLIENT_ID = "testb" # change it accordingly to your client
+MQTT_CLIENT_ID = "ffc1" # change it accordingly to your client
 MQTT_BROKER    = "broker.mqttdashboard.com"
 MQTT_USER      = ""
 MQTT_PASSWORD  = ""
 MQTT_TOPIC     = "polimi/project-p7a"
 CLIENT_TYPE    = "ALL" #HUMIDITY or LED or ALL
 
-clientID = 3 # change accordingly to your client. If the client is HUMIDITY, this should be set
+clientID = 1 # change accordingly to your client. If the client is HUMIDITY, this should be set
              # to either 1 or 2, and will send to a random among 3 or 4. Vice versa if this is
              # LED. Be sure if you want to use the ALL type clients, to set correctly clients ID
              # (with ALL type clients, still if the client is 1 or 2 will send to 3 or 4, and 
@@ -33,42 +33,42 @@ def incomingProcessing(topic,msg):
   global joined
   global timestampToSend
   msg = json.loads(msg)
-  print(msg['type'])
-  if(msg['type'] == 'BEACON'):
+  print(msg['Type'])
+  if(msg['Type'] == 'BEACON'):
     # If the client has not joined yet the networ, when receiving a beacon needs to send the register request
     if(joined == 0):
       # supposing the beacon arrives in the same time in which it is sent, we need to wait the slot reserved to the beacon.
       # after that slot, the CAP start, and we can send the registering request.
-      waitingTime = float(msg['slotDuration'])
+      waitingTime = float(msg['SlotDuration'])
       print('wait for: ' + str(waitingTime))
       time.sleep(waitingTime)
       message = json.dumps({
-        "type": "REGISTER",
-        "address": clientID
+        "Type": "REGISTER",
+        "From": clientID
       })
       client.publish(MQTT_TOPIC, message)
       joined =1
     else:
-      # TODO: discuss on this if. Should be better to wait also if we are a LED client? (i.e., no if)
       # If the client is of type humidity or all, we need for sure to wait our turn before sending the 
       # humidity value. We need to compute our turn according to the information contained in the 
       # beacon message.
       if(CLIENT_TYPE == "HUMIDITY" or CLIENT_TYPE == "ALL"):
-        print( msg['timestamp'])
         print(time.time())
         print(msg['CFPReservation'])
         res = json.loads(msg['CFPReservation'])
         if(clientID in res):
           print(res.index(clientID))
-          waitingTime = float(msg['slotDuration'])*(1+int((msg['CAPSlots']))+res.index(clientID))
+          # For the waiting time we do not consider the slot reserved to the beacon, since when we are able to decode 
+          # it, the slot of the beacon has already finished, and the CAP has just started
+          waitingTime = float(msg['SlotDuration'])*(int((msg['CAPSlots']))+res.index(clientID))
           print('wait for: ' + str(waitingTime))
           timestampToSend = time.time() + waitingTime
   # If we receive a DATA message, then if we are a LED (or ALL) type client, and the message is for us,
   # then we need to modify the intensity of our LED accordingly to the received value 
-  if(msg['type'] == 'DATA'):
-    if(msg['destination'] == clientID and (CLIENT_TYPE == "LED" or CLIENT_TYPE == "ALL")):
-      print('Received data: '+ str(msg['content']))
-      luminosityLevel = int(1023/100*int(msg['content']))
+  if(msg['Type'] == 'DATA'):
+    if(msg['Destination'] == clientID and (CLIENT_TYPE == "LED" or CLIENT_TYPE == "ALL")):
+      print('Received data: '+ str(msg['Content']))
+      luminosityLevel = int(1023/100*int(msg['Content']))
       print("setting luminosity level to "+ str(luminosityLevel) + " out of 1023")
       led.duty(luminosityLevel)
 
@@ -97,15 +97,17 @@ while True:
   # sure to be in our reserved slot in the CAP), and then we need to send the message.
   if (timestampToSend != 0 and time.time() >= timestampToSend and (CLIENT_TYPE == "HUMIDITY" or CLIENT_TYPE == "ALL")):
     sensor.measure()
-    # As specified above, 1 and 2 sends to 3 and for, and vice versa.
+    # As specified above, 1 and 2 sends to 3 and 4, and vice versa.
     if(clientID == 1 or clientID == 2):
-      destination = random.randint(3,4)
+      destination = random.randint(3,3)
     else:
-      destination = random.randint(1,2)
+      destination = random.randint(1,1)
+    # The message will be a data message with the actual value of the humidity read of the sensor
     message = json.dumps({
-      "type": "DATA",
-      "destination": destination,
-      "content": sensor.humidity()
+      "Type": "DATA",
+      "From": clientID,
+      "Destination": destination,
+      "Content": sensor.humidity()
     })
     client.publish(MQTT_TOPIC, message)
     print('sending' + message)
