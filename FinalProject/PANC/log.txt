@@ -1,0 +1,80 @@
+8 Aug 10:18:47 - [info] Starting flows
+8 Aug 10:18:47 - [info] Started flows
+init
+[PANC]: Clients Queue Initialized
+8 Aug 10:18:48 - [info] [mqtt-broker:dashboard] Connected to broker: mqtt://broker.mqttdashboard.com:1883
+[PANC]: ------SENDING BEACON------
+[PANC]: clients' IDs connected: NONE
+[PANC]: Number of slots in CAP for this Beacon Interval: 2
+[PANC]: Number of slots in CFP for this Beacon Interval: 0
+[PANC]: Number of slots in Sleep for this Beacon Interval: 57
+[PANC]: The duty cycle of this Beacon Interval is 0.05
+[PANC]: The BI lasts: 30 seconds
+[PANC]: Request to register by client ID 4
+[PANC]: Added client ID 4
+[PANC]: Request to register by client ID 1
+[PANC]: Added client ID 1
+[PANC]: Request to register by client ID 3
+[PANC]: Added client ID 3
+[PANC]: Request to register by client ID 2
+[PANC]: Added client ID 2
+[PANC]: ------SENDING BEACON------
+[PANC]: clients' IDs connected: 4,1,3,2
+[PANC]: CFP schedule of client's IDs this Beacon Interval: 1,2,3,4
+[PANC]: Number of slots in CAP for this Beacon Interval: 2
+[PANC]: Number of slots in CFP for this Beacon Interval: 4
+[PANC]: Number of slots in Sleep for this Beacon Interval: 53
+[PANC]: The duty cycle of this Beacon Interval is 0.11666666666666667
+[PANC]: The BI lasts: 30 seconds
+[PANC]: Sniffed data message:
+{ Content: 40, Type: 'DATA', Destination: 3, From: 1 }
+[PANC]: Sniffed data message:
+{ Content: 40, Type: 'DATA', Destination: 3, From: 2 }
+[PANC]: ------SENDING BEACON------
+[PANC]: clients' IDs connected: 4,1,3,2
+[PANC]: CFP schedule of client's IDs this Beacon Interval: 1,2,3,4
+[PANC]: Number of slots in CAP for this Beacon Interval: 2
+[PANC]: Number of slots in CFP for this Beacon Interval: 4
+[PANC]: Number of slots in Sleep for this Beacon Interval: 53
+[PANC]: The duty cycle of this Beacon Interval is 0.11666666666666667
+[PANC]: The BI lasts: 30 seconds
+[PANC]: Sniffed data message:
+{ Content: 100, Type: 'DATA', Destination: 3, From: 1 }
+[PANC]: Sniffed data message:
+{ Content: 30, Type: 'DATA', Destination: 4, From: 2 }
+[PANC]: ------SENDING BEACON------
+[PANC]: clients' IDs connected: 4,1,3,2
+[PANC]: CFP schedule of client's IDs this Beacon Interval: 1,2,3,4
+[PANC]: Number of slots in CAP for this Beacon Interval: 2
+[PANC]: Number of slots in CFP for this Beacon Interval: 4
+[PANC]: Number of slots in Sleep for this Beacon Interval: 53
+[PANC]: The duty cycle of this Beacon Interval is 0.11666666666666667
+[PANC]: The BI lasts: 30 seconds
+[PANC]: Sniffed data message:
+{ Content: 0, Type: 'DATA', Destination: 3, From: 1 }
+[PANC]: Sniffed data message:
+{ Content: 0, Type: 'DATA', Destination: 3, From: 2 }
+[PANC]: ------SENDING BEACON------
+[PANC]: clients' IDs connected: 4,1,3,2
+[PANC]: CFP schedule of client's IDs this Beacon Interval: 1,2,3,4
+[PANC]: Number of slots in CAP for this Beacon Interval: 2
+[PANC]: Number of slots in CFP for this Beacon Interval: 4
+[PANC]: Number of slots in Sleep for this Beacon Interval: 53
+[PANC]: The duty cycle of this Beacon Interval is 0.11666666666666667
+[PANC]: The BI lasts: 30 seconds
+[PANC]: Sniffed data message:
+{ Content: 0, Type: 'DATA', Destination: 3, From: 1 }
+[PANC]: Sniffed data message:
+{ Content: 0, Type: 'DATA', Destination: 3, From: 2 }
+[PANC]: ------SENDING BEACON------
+[PANC]: clients' IDs connected: 4,1,3,2
+[PANC]: CFP schedule of client's IDs this Beacon Interval: 1,2,3,4
+[PANC]: Number of slots in CAP for this Beacon Interval: 2
+[PANC]: Number of slots in CFP for this Beacon Interval: 4
+[PANC]: Number of slots in Sleep for this Beacon Interval: 53
+[PANC]: The duty cycle of this Beacon Interval is 0.11666666666666667
+[PANC]: The BI lasts: 30 seconds
+[PANC]: Sniffed data message:
+{ Content: 0, Type: 'DATA', Destination: 3, From: 1 }
+[PANC]: Sniffed data message:
+{ Content: 0, Type: 'DATA', Destination: 4, From: 2 }
