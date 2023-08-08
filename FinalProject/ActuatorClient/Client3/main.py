@@ -7,13 +7,13 @@ from umqtt.simple import MQTTClient
 import random
 
 # MQTT Server Parameters
-MQTT_CLIENT_ID = "actuatorthree" # change it accordingly to your client
+MQTT_CLIENT_ID = "actuatorthree"
 MQTT_BROKER    = "broker.mqttdashboard.com"
 MQTT_USER      = ""
 MQTT_PASSWORD  = ""
 MQTT_TOPIC     = "polimi/project-p7a"
 
-clientID = 3 # Should be 3 or 4
+clientID = 3
 
 # variable that tells if the client already registered to the PAN coordinator
 joined = 0

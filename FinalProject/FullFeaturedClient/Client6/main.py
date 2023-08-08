@@ -7,18 +7,17 @@ from umqtt.simple import MQTTClient
 import random
 
 # MQTT Server Parameters
-MQTT_CLIENT_ID = "ffc1" # change it accordingly to your client
+MQTT_CLIENT_ID = "ffcsix"
 MQTT_BROKER    = "broker.mqttdashboard.com"
 MQTT_USER      = ""
 MQTT_PASSWORD  = ""
 MQTT_TOPIC     = "polimi/project-p7a"
 CLIENT_TYPE    = "ALL" #HUMIDITY or LED or ALL
 
-clientID = 1 # change accordingly to your client. If the client is HUMIDITY, this should be set
+clientID = 6 # change accordingly to your client. If the client is HUMIDITY, this should be set
              # to either 1 or 2, and will send to a random among 3 or 4. Vice versa if this is
              # LED. Be sure if you want to use the ALL type clients, to set correctly clients ID
-             # (with ALL type clients, still if the client is 1 or 2 will send to 3 or 4, and 
-             # vice versa).
+             # (with ALL type clients, the client id needs to be 6)
 
 # variable that tells if the client already registered to the PAN coordinator
 joined = 0
@@ -98,10 +97,7 @@ while True:
   if (timestampToSend != 0 and time.time() >= timestampToSend and (CLIENT_TYPE == "HUMIDITY" or CLIENT_TYPE == "ALL")):
     sensor.measure()
     # As specified above, 1 and 2 sends to 3 and 4, and vice versa.
-    if(clientID == 1 or clientID == 2):
-      destination = random.randint(3,3)
-    else:
-      destination = random.randint(1,1)
+    destination = 5
     # The message will be a data message with the actual value of the humidity read of the sensor
     message = json.dumps({
       "Type": "DATA",
