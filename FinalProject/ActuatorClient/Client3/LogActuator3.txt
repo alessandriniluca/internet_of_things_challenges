@@ -1,0 +1,39 @@
+Connecting to WiFi................ Connected!
+Connecting to MQTT server... Connected!
+BEACON
+wait for: 0.0
+REGISTER
+REGISTER
+REGISTER
+REGISTER
+BEACON
+DATA
+Received data: 40.0
+setting luminosity level to 409 out of 1023
+DATA
+Received data: 40.0
+setting luminosity level to 409 out of 1023
+BEACON
+DATA
+Received data: 100.0
+setting luminosity level to 1022 out of 1023
+DATA
+BEACON
+DATA
+Received data: 0.0
+setting luminosity level to 0 out of 1023
+DATA
+Received data: 0.0
+setting luminosity level to 0 out of 1023
+BEACON
+DATA
+Received data: 0.0
+setting luminosity level to 0 out of 1023
+DATA
+Received data: 0.0
+setting luminosity level to 0 out of 1023
+BEACON
+DATA
+Received data: 0.0
+setting luminosity level to 0 out of 1023
+DATA

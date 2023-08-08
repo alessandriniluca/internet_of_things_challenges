@@ -1,0 +1,48 @@
+Connecting to WiFi................ Connected!
+Connecting to MQTT server... Connected!
+BEACON
+wait for: 0.5
+REGISTER
+REGISTER
+REGISTER
+REGISTER
+BEACON
+109
+[1,2,3,4]
+1
+wait for: 1.5
+DATA
+sending{"Content": 40.0, "Type": "DATA", "Destination": 3, "From": 2}
+DATA
+BEACON
+139
+[1,2,3,4]
+1
+wait for: 1.5
+DATA
+sending{"Content": 30.0, "Type": "DATA", "Destination": 4, "From": 2}
+DATA
+BEACON
+169
+[1,2,3,4]
+1
+wait for: 1.5
+DATA
+sending{"Content": 0.0, "Type": "DATA", "Destination": 3, "From": 2}
+DATA
+BEACON
+199
+[1,2,3,4]
+1
+wait for: 1.5
+DATA
+sending{"Content": 0.0, "Type": "DATA", "Destination": 3, "From": 2}
+DATA
+BEACON
+229
+[1,2,3,4]
+1
+wait for: 1.5
+DATA
+sending{"Content": 0.0, "Type": "DATA", "Destination": 4, "From": 2}
+DATA
